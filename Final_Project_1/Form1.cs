@@ -15,62 +15,19 @@ namespace FileExplorer
     
     public partial class Form1 : Form
     {
-        public static class DefaultIcons
-        {
-            private static readonly Lazy<Icon> _lazyFolderIcon = new Lazy<Icon>(FetchIcon, true);
-
-            public static Icon FolderLarge
-            {
-                get { return _lazyFolderIcon.Value; }
-            }
-
-            private static Icon FetchIcon()
-            {
-                var tmpDir = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString())).FullName;
-                var icon = ExtractFromPath(tmpDir);
-                Directory.Delete(tmpDir);
-                return icon;
-            }
-
-            private static Icon ExtractFromPath(string path)
-            {
-                SHFILEINFO shinfo = new SHFILEINFO();
-                SHGetFileInfo(
-                    path,
-                    0, ref shinfo, (uint)Marshal.SizeOf(shinfo),
-                    SHGFI_ICON | SHGFI_LARGEICON);
-                return System.Drawing.Icon.FromHandle(shinfo.hIcon);
-            }
-
-            //Struct used by SHGetFileInfo function
-            [StructLayout(LayoutKind.Sequential)]
-            private struct SHFILEINFO
-            {
-                public IntPtr hIcon;
-                public int iIcon;
-                public uint dwAttributes;
-                [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 260)]
-                public string szDisplayName;
-                [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 80)]
-                public string szTypeName;
-            };
-
-            [DllImport("shell32.dll")]
-            private static extern IntPtr SHGetFileInfo(string pszPath, uint dwFileAttributes, ref SHFILEINFO psfi, uint cbSizeFileInfo, uint uFlags);
-
-            private const uint SHGFI_ICON = 0x100;
-            private const uint SHGFI_LARGEICON = 0x0;
-            private const uint SHGFI_SMALLICON = 0x000000001;
-        }
+        private SystemIconsImageList sysIcons = new SystemIconsImageList();
         string selectedFolder1, selectedFolder2;
         string curPath1, curPath2;
         int run;
+       
+        bool show_hidden;
         public Form1()
         {
             InitializeComponent();
             this.Text = "Total Commander (UNREGISTERED) - 17CLC1";
             //Khởi tạo allDrive để liệt kê mọi ổ đĩa có trong máy
             DriveInfo[] allDrive = DriveInfo.GetDrives();
+            this.showHiddenToolStripMenuItem.Checked = false;
             foreach (DriveInfo d in allDrive)
             {
                 if (d.IsReady)
@@ -82,117 +39,21 @@ namespace FileExplorer
             //Gán các giá trị mặc định ban đầu được chọn là cái đầu tiên (index = 0)
             comboBox1.SelectedIndex = 0;
             comboBox2.SelectedIndex = 0;
+            listView1.LargeImageList = sysIcons.LargeIconsImageList;
+            listView1.SmallImageList = sysIcons.SmallIconsImageList;
+            listView2.SmallImageList = sysIcons.SmallIconsImageList;
+            listView2.LargeImageList = sysIcons.LargeIconsImageList;
+            //createFolder();
         }
 
 
-        private void HelpToolStripMenuItem1_Click(object sender, EventArgs e)
-        {
-            
-        }
+        
 
-        private void AboutToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            MessageBox.Show("            Developed by Vo Tran Chi Hung\n                  Ma so sinh vien: 1753058\n                             FIT-HCMUS");
-        }
-
-        private void ExitToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            Application.Exit();
-        }
+       
 
         private void ListView1_MouseDoubleClick(object sender, MouseEventArgs e)
         {
-            if (listView1.SelectedItems.Count == 0)
-                return;
-            run = 1;
-            string path = this.listView1.SelectedItems[0].Name;
-            textBox1.Text = path;
-            FileAttributes attr = File.GetAttributes(path);
-            if ((attr & FileAttributes.Directory) == FileAttributes.Directory)
-            {
-                try
-                {
-
-                    DirectoryInfo d = new DirectoryInfo(path);
-                    string[] fileArray = Directory.GetFiles(path);
-                    string[] folderArray = Directory.GetDirectories(path);
-                    listView1.Items.Clear();
-                    bool flag = false;
-                    for (int i = 0; i < comboBox1.Items.Count; i++)
-                    {
-                        //Nếu đường dẫn đã chọn trùng với các thư mục gốc
-                        if (path == comboBox1.Items[i].ToString())
-                        {
-
-                            flag = true;
-                            break;
-                        }
-                    }
-                    DirectoryInfo dir = new System.IO.DirectoryInfo(path);
-                    
-                    if (flag != true)
-                    {
-                        //Nếu đã chọn quay lại nhưng không phải thư mục gốc
-                        ListViewItem temp = new ListViewItem("..");
-                        temp.Name = (Directory.GetParent(path).ToString());
-                        listView1.Items.Add(temp);
-                    }
-
-
-                    ImageList list = new ImageList();
-                    foreach (string file in fileArray)
-                    {
-                        //Tên hiện bên ngoài (Text): Là tên file
-                        FileInfo fi = new FileInfo(file);
-                        long f1 = fi.Length / 1024;
-                        ListViewItem temp = new ListViewItem(Path.GetFileName(file));
-                        //Name ở đây là đường dẫn
-
-                        if (!imageList1.Images.ContainsKey(fi.Extension))
-                        {
-
-                            imageList1.Images.Add(fi.Extension, Icon.ExtractAssociatedIcon(file));
-                        }
-                        int index = imageList1.Images.Keys.IndexOf(fi.Extension);
-                        temp.ImageIndex = index;
-                        temp.Name = file;
-                        temp.SubItems.Add(Path.GetExtension(file));
-                        temp.SubItems.Add(f1.ToString());
-                        var date = System.IO.File.GetLastWriteTime(file);
-                        temp.SubItems.Add(date.ToString("dd/MM/yy HH:mm:ss"));
-                        listView1.Items.Add(temp);
-                    }
-                    foreach (string folder in folderArray)
-                    {
-                        ListViewItem temp = new ListViewItem(Path.GetFileNameWithoutExtension(folder));
-                        //Name ở đây là đường dẫn
-                        temp.Name = folder;
-                        temp.ImageKey = "f";
-                        temp.SubItems.Add(" ");
-                        temp.SubItems.Add("<DIR>");
-                        var date = Directory.GetLastWriteTime(folder);
-                        temp.SubItems.Add(date.ToString("dd/MM/yy HH:mm:ss"));
-                        listView1.Items.Add(temp);
-                    }
-
-                    return;
-                }
-                catch (UnauthorizedAccessException)
-                {
-                    //Không có quyền truy cập
-                    MessageBox.Show("Not Authorized!");
-                }
-              
-                this.listView1.Items[0].Selected = true;
-                
-                this.listView1.HideSelection = false;
-                this.listView1.Items[0].Focused = true;
-                run = 1;
-            }
-            
-            else
-                //Chạy chương trình
-                System.Diagnostics.Process.Start(path);
+            LoadListView(listView1, out selectedFolder1, imageList1, comboBox1, textBox1, listView2);
         }
     
 
@@ -202,120 +63,17 @@ namespace FileExplorer
         }
 
        
-        private void Label1_Click(object sender, EventArgs e)
-        {
-            //label1.Text = selectedFolder1;
-        }
 
-        private void TextBox1_TextChanged(object sender, EventArgs e)
-        {
-
-        }
 
         private void ListView1_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.Enter)
             {
-                if (listView1.SelectedItems.Count == 0)
-                    return;
-                run = 1;
-                string path = this.listView1.SelectedItems[0].Name;
-                textBox1.Text = path;
-                FileAttributes attr = File.GetAttributes(path);
-                if ((attr & FileAttributes.Directory) == FileAttributes.Directory)
-                {
-                    try
-                    {
-
-                        DirectoryInfo d = new DirectoryInfo(path);
-                        string[] fileArray = Directory.GetFiles(path);
-                        string[] folderArray = Directory.GetDirectories(path);
-                        listView1.Items.Clear();
-                        bool flag = false;
-                        for (int i = 0; i < comboBox1.Items.Count; i++)
-                        {
-                            //Nếu đường dẫn đã chọn trùng với các thư mục gốc
-                            if (path == comboBox1.Items[i].ToString())
-                            {
-
-                                flag = true;
-                                break;
-                            }
-                        }
-
-                        if (flag != true)
-                        {
-                            //Nếu đã chọn quay lại nhưng không phải thư mục gốc
-                            ListViewItem temp = new ListViewItem("..");
-                            temp.Name = (Directory.GetParent(path).ToString());
-                            listView1.Items.Add(temp);
-                        }
-
-
-
-                        foreach (string file in fileArray)
-                        {
-                            //Tên hiện bên ngoài (Text): Là tên file
-                            FileInfo fi = new FileInfo(file);
-                            long f1 = fi.Length / 1024;
-                            ListViewItem temp = new ListViewItem(Path.GetFileName(file));
-                            //Name ở đây là đường dẫn
-                            temp.Name = file;
-                            if (!imageList1.Images.ContainsKey(fi.Extension))
-                            {
-
-                                imageList1.Images.Add(fi.Extension, Icon.ExtractAssociatedIcon(file));
-                            }
-                            int index = imageList1.Images.Keys.IndexOf(fi.Extension);
-                            temp.ImageIndex = index;
-                            
-                            temp.SubItems.Add(Path.GetExtension(file));
-                            temp.SubItems.Add(f1.ToString());
-                            var date = System.IO.File.GetLastWriteTime(file);
-                            temp.SubItems.Add(date.ToString("dd/MM/yy HH:mm:ss"));
-                            listView1.Items.Add(temp);
-                        }
-                        foreach (string folder in folderArray)
-                        {
-                            ListViewItem temp = new ListViewItem(Path.GetFileNameWithoutExtension(folder));
-                            //Name ở đây là đường dẫn
-                            temp.Name = folder;
-                            temp.ImageKey = "f";
-                            temp.SubItems.Add(" ");
-                            temp.SubItems.Add("<DIR>");
-                            var date = Directory.GetLastWriteTime(folder);
-                            temp.SubItems.Add(date.ToString("dd/MM/yy HH:mm:ss"));
-                            listView1.Items.Add(temp);
-                        }
-
-                        return;
-                    }
-                    catch (UnauthorizedAccessException)
-                    {
-                        //Không có quyền truy cập
-                        this.textBox1.Text = Directory.GetParent(path).ToString();
-                        MessageBox.Show("Not Authorized!");
-                    }
-
-                    this.listView1.Items[0].Selected = true;
-
-                    this.listView2.HideSelection = true;
-                    this.listView1.HideSelection = false;
-                    this.listView1.Items[0].Focused = true;
-
-                }
-
-                else
-                    //Chạy chương trình
-                    // this.textBox2.Text = Directory.GetParent(path).ToString();
-                    System.Diagnostics.Process.Start(path);
+                LoadListView(listView1, out selectedFolder1, imageList1, comboBox1, textBox1, listView2);
             }
         }
 
-        void loadListView(ListView LS)
-        {
-
-        }
+       
 
         private void ViewToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -323,13 +81,23 @@ namespace FileExplorer
             {
                 string path = this.listView1.SelectedItems[0].Name;
                 textBox1.Text = path;
-                string readText = System.IO.File.ReadAllText(path);
-                Form form2 = new Form();
-                //Console.WriteLine(readText);
-                MessageBox.Show(readText);
-                TextBox txt = new TextBox();
-                txt.Text = readText;
-                form2.Controls.Add(txt);
+                //string readText = System.IO.File.ReadAllText(path);
+                FileAttributes attr = File.GetAttributes(path);
+                Form Form_2 = new Form();
+                TextBox tb = new TextBox();
+                
+                if ((attr & FileAttributes.Directory) == FileAttributes.Directory)
+                {
+                    string name = path;
+                    DirectoryInfo di = new DirectoryInfo(path);
+                    string date = Directory.GetLastWriteTime(name).ToString("dd/MM/yy HH:mm:ss");
+                    string volume = (di.EnumerateFiles("*", SearchOption.AllDirectories).Sum(fi => fi.Length)).ToString();
+                }
+                else
+                {
+
+                }
+                Form_2.Controls.Add(tb);
                 run = 1;
             }
             else
@@ -354,174 +122,14 @@ namespace FileExplorer
 
         private void ListView2_MouseDoubleClick(object sender, MouseEventArgs e)
         {
-            if (listView2.SelectedItems.Count == 0)
-                return;
-            run = 2;
-            string path = this.listView2.SelectedItems[0].Name;
-            textBox2.Text = path;
-            FileAttributes attr = File.GetAttributes(path);
-            if ((attr & FileAttributes.Directory) == FileAttributes.Directory)
-            {
-                try
-                {
-
-                    DirectoryInfo d = new DirectoryInfo(path);
-                    string[] fileArray = Directory.GetFiles(path);
-                    string[] folderArray = Directory.GetDirectories(path);
-                    listView2.Items.Clear();
-                    bool flag = false;
-                    for (int i = 0; i < comboBox1.Items.Count; i++)
-                    {
-                        //Nếu đường dẫn đã chọn trùng với các thư mục gốc
-                        if (path == comboBox1.Items[i].ToString())
-                        {
-
-                            flag = true;
-                            break;
-                        }
-                    }
-
-                    if (flag != true)
-                    {
-                        //Nếu đã chọn quay lại nhưng không phải thư mục gốc
-                        ListViewItem temp = new ListViewItem("..");
-                        temp.Name = (Directory.GetParent(path).ToString());
-                        listView2.Items.Add(temp);
-                    }
-
-
-
-                    foreach (string file in fileArray)
-                    {
-                        //Tên hiện bên ngoài (Text): Là tên file
-                        FileInfo f = new FileInfo(file);
-                        long f1 = f.Length / 1024;
-                        ListViewItem temp = new ListViewItem(Path.GetFileName(file));
-                        //Name ở đây là đường dẫn
-                        Icon iconFile = System.Drawing.Icon.ExtractAssociatedIcon(file);
-                        //temp.ImageKey = 
-                        temp.Name = file;
-                        temp.SubItems.Add(Path.GetExtension(file));
-                        temp.SubItems.Add(f1.ToString());
-                        var date = System.IO.File.GetLastWriteTime(file);
-                        temp.SubItems.Add(date.ToString("dd/MM/yy HH:mm:ss"));
-                        listView2.Items.Add(temp);
-                    }
-                    foreach (string folder in folderArray)
-                    {
-                        ListViewItem temp = new ListViewItem(Path.GetFileNameWithoutExtension(folder));
-                        //Name ở đây là đường dẫn
-                        temp.Name = folder;
-                        temp.SubItems.Add(" ");
-                        temp.SubItems.Add("<DIR>");
-                        var date = Directory.GetLastWriteTime(folder);
-                        temp.SubItems.Add(date.ToString("dd/MM/yy HH:mm:ss"));
-                        listView2.Items.Add(temp);
-                    }
-
-                    return;
-                }
-                catch (UnauthorizedAccessException)
-                {
-                    //Không có quyền truy cập
-                    this.textBox2.Text = Directory.GetParent(path).ToString();
-                    MessageBox.Show("Not Authorized!");
-                }
-
-                this.listView2.Items[0].Selected = true;
-
-                this.listView1.HideSelection = true;
-                this.listView2.HideSelection = false;
-                this.listView2.Items[0].Focused = true;
-
-            }
-
-            else
-                //Chạy chương trình
-               // this.textBox2.Text = Directory.GetParent(path).ToString();
-                System.Diagnostics.Process.Start(path);
+            LoadListView(listView2, out selectedFolder2, imageList2, comboBox2, textBox2, listView1);
         }
 
         private void TextBox1_KeyDown(object sender, KeyEventArgs e)
         {
             if(e.KeyCode==Keys.Enter)
             {
-                run = 1;
-                string path = this.textBox1.Text;
-                
-                FileAttributes attr = File.GetAttributes(path);
-                if ((attr & FileAttributes.Directory) == FileAttributes.Directory)
-                {
-                    try
-                    {
-
-                        DirectoryInfo d = new DirectoryInfo(path);
-                        string[] fileArray = Directory.GetFiles(path);
-                        string[] folderArray = Directory.GetDirectories(path);
-                        listView1.Items.Clear();
-                        bool flag = false;
-                        for (int i = 0; i < comboBox1.Items.Count; i++)
-                        {
-                            //Nếu đường dẫn đã chọn trùng với các thư mục gốc
-                            if (path == comboBox1.Items[i].ToString())
-                            {
-
-                                flag = true;
-                                break;
-                            }
-                        }
-
-                        if (flag != true)
-                        {
-                            //Nếu đã chọn quay lại nhưng không phải thư mục gốc
-                            ListViewItem temp = new ListViewItem("..");
-                            temp.Name = (Directory.GetParent(path).ToString());
-                            listView1.Items.Add(temp);
-                        }
-                        
-
-
-                        foreach (string file in fileArray)
-                        {
-                            //Tên hiện bên ngoài (Text): Là tên file
-                            FileInfo f = new FileInfo(file);
-                            long f1 = f.Length / 1024;
-                            ListViewItem temp = new ListViewItem(Path.GetFileName(file));
-                            //Name ở đây là đường dẫn
-                            Icon iconFile = System.Drawing.Icon.ExtractAssociatedIcon(file);
-                            //temp.ImageKey = 
-                            temp.Name = file;
-                            temp.SubItems.Add(Path.GetExtension(file));
-                            temp.SubItems.Add(f1.ToString());
-                            var date = System.IO.File.GetLastWriteTime(file);
-                            temp.SubItems.Add(date.ToString("dd/MM/yy HH:mm:ss"));
-                            listView1.Items.Add(temp);
-                        }
-                        foreach (string folder in folderArray)
-                        {
-                            ListViewItem temp = new ListViewItem(Path.GetFileNameWithoutExtension(folder));
-                            //Name ở đây là đường dẫn
-                            temp.Name = folder;
-                            temp.SubItems.Add(" ");
-                            temp.SubItems.Add("<DIR>");
-                            var date = Directory.GetLastWriteTime(folder);
-                            temp.SubItems.Add(date.ToString("dd/MM/yy HH:mm:ss"));
-                            listView1.Items.Add(temp);
-                        }
-
-                        return;
-                    }
-                    catch (UnauthorizedAccessException)
-                    {
-                        //Không có quyền truy cập
-                        MessageBox.Show("Not Authorized!");
-                    }
-
-
-                }
-                else
-                    //Chạy chương trình
-                    System.Diagnostics.Process.Start(path);
+                LoadLSfromTextBox(listView1, textBox1, out selectedFolder1, imageList1, comboBox1, listView2);
             }
             
         }
@@ -530,88 +138,8 @@ namespace FileExplorer
         {
             if(e.KeyCode==Keys.Enter)
             {
-                run = 2;
-                string path = this.textBox2.Text;
+                LoadLSfromTextBox(listView2, textBox2, out selectedFolder2, imageList2, comboBox2, listView1);
                 
-                FileAttributes attr = File.GetAttributes(path);
-                if ((attr & FileAttributes.Directory) == FileAttributes.Directory)
-                {
-                    try
-                    {
-
-                        DirectoryInfo d = new DirectoryInfo(path);
-                        string[] fileArray = Directory.GetFiles(path);
-                        string[] folderArray = Directory.GetDirectories(path);
-                        listView2.Items.Clear();
-                        bool flag = false;
-                        for (int i = 0; i < comboBox1.Items.Count; i++)
-                        {
-                            //Nếu đường dẫn đã chọn trùng với các thư mục gốc
-                            if (path == comboBox2.Items[i].ToString())
-                            {
-
-                                flag = true;
-                                break;
-                            }
-                        }
-
-                        if (flag != true)
-                        {
-                            //Nếu đã chọn quay lại nhưng không phải thư mục gốc
-                            ListViewItem temp = new ListViewItem("..");
-                            temp.Name = (Directory.GetParent(path).ToString());
-                            listView2.Items.Add(temp);
-                        }
-
-
-
-                        foreach (string file in fileArray)
-                        {
-                            //Tên hiện bên ngoài (Text): Là tên file
-                            FileInfo f = new FileInfo(file);
-                            long f1 = f.Length / 1024;
-                            ListViewItem temp = new ListViewItem(Path.GetFileName(file));
-                            //Name ở đây là đường dẫn
-                            Icon iconFile = System.Drawing.Icon.ExtractAssociatedIcon(file);
-                            //temp.ImageKey = 
-                            temp.Name = file;
-                            temp.SubItems.Add(Path.GetExtension(file));
-                            temp.SubItems.Add(f1.ToString());
-                            var date = System.IO.File.GetLastWriteTime(file);
-                            temp.SubItems.Add(date.ToString("dd/MM/yy HH:mm:ss"));
-                            listView2.Items.Add(temp);
-                        }
-                        foreach (string folder in folderArray)
-                        {
-                            ListViewItem temp = new ListViewItem(Path.GetFileNameWithoutExtension(folder));
-                            //Name ở đây là đường dẫn
-                            temp.Name = folder;
-                            temp.SubItems.Add(" ");
-                            temp.SubItems.Add("<DIR>");
-                            var date = Directory.GetLastWriteTime(folder);
-                            temp.SubItems.Add(date.ToString("dd/MM/yy HH:mm:ss"));
-                            listView2.Items.Add(temp);
-                        }
-
-                        return;
-                    }
-                    catch (UnauthorizedAccessException)
-                    {
-                        //Không có quyền truy cập
-                        MessageBox.Show("Not Authorized!");
-                    }
-
-                    this.listView2.Items[0].Selected = true;
-
-                    this.listView1.HideSelection = true;
-                    this.listView2.HideSelection = false;
-                    this.listView2.Items[0].Focused = true;
-
-                }
-
-                else
-                    //Chạy chương trình
-                    System.Diagnostics.Process.Start(path);
             }
         }
 
@@ -624,93 +152,102 @@ namespace FileExplorer
         {
             if (e.KeyCode == Keys.Enter)
             {
-                if (listView2.SelectedItems.Count == 0)
-                    return;
-                run = 2;
-                string path = this.listView2.SelectedItems[0].Name;
-                textBox2.Text = path;
-                FileAttributes attr = File.GetAttributes(path);
-                if ((attr & FileAttributes.Directory) == FileAttributes.Directory)
-                {
-                    try
-                    {
-
-                        DirectoryInfo d = new DirectoryInfo(path);
-                        string[] fileArray = Directory.GetFiles(path);
-                        string[] folderArray = Directory.GetDirectories(path);
-                        listView2.Items.Clear();
-                        bool flag = false;
-                        for (int i = 0; i < comboBox1.Items.Count; i++)
-                        {
-                            //Nếu đường dẫn đã chọn trùng với các thư mục gốc
-                            if (path == comboBox1.Items[i].ToString())
-                            {
-
-                                flag = true;
-                                break;
-                            }
-                        }
-
-                        if (flag != true)
-                        {
-                            //Nếu đã chọn quay lại nhưng không phải thư mục gốc
-                            ListViewItem temp = new ListViewItem("..");
-                            temp.Name = (Directory.GetParent(path).ToString());
-                            listView2.Items.Add(temp);
-                        }
-
-
-
-                        foreach (string file in fileArray)
-                        {
-                            //Tên hiện bên ngoài (Text): Là tên file
-                            FileInfo f = new FileInfo(file);
-                            long f1 = f.Length / 1024;
-                            ListViewItem temp = new ListViewItem(Path.GetFileName(file));
-                            //Name ở đây là đường dẫn
-                            Icon iconFile = System.Drawing.Icon.ExtractAssociatedIcon(file);
-                            //temp.ImageKey = 
-                            temp.Name = file;
-                            temp.SubItems.Add(Path.GetExtension(file));
-                            temp.SubItems.Add(f1.ToString());
-                            var date = System.IO.File.GetLastWriteTime(file);
-                            temp.SubItems.Add(date.ToString("dd/MM/yy HH:mm:ss"));
-                            listView2.Items.Add(temp);
-                        }
-                        foreach (string folder in folderArray)
-                        {
-                            ListViewItem temp = new ListViewItem(Path.GetFileNameWithoutExtension(folder));
-                            //Name ở đây là đường dẫn
-                            temp.Name = folder;
-                            temp.SubItems.Add(" ");
-                            temp.SubItems.Add("<DIR>");
-                            var date = Directory.GetLastWriteTime(folder);
-                            temp.SubItems.Add(date.ToString("dd/MM/yy HH:mm:ss"));
-                            listView2.Items.Add(temp);
-                        }
-
-                        return;
-                    }
-                    catch (UnauthorizedAccessException)
-                    {
-                        //Không có quyền truy cập
-                        this.textBox2.Text = Directory.GetParent(path).ToString();
-                        MessageBox.Show("Not Authorized!");
-                    }
-
-                    this.listView2.Items[0].Selected = true;
-
-                    this.listView1.HideSelection = true;
-                    this.listView2.HideSelection = false;
-                    this.listView2.Items[0].Focused = true;
-
-                }
-
-                else
-                    //Chạy chương trình
-                    // this.textBox2.Text = Directory.GetParent(path).ToString();
-                    System.Diagnostics.Process.Start(path);
+                LoadListView(listView2, out selectedFolder2, imageList2, comboBox2, textBox2, listView1);
             }
+        }
+
+        private void NewFolderToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            string name = createFolder();
+            ListViewItem temp = new ListViewItem(Path.GetFileNameWithoutExtension(name));
+            temp.Name = Name;
+            temp.ImageIndex = sysIcons.GetIconIndex(name);
+            temp.SubItems.Add(" ");
+            temp.SubItems.Add("<DIR>");
+            var date = Directory.GetLastWriteTime(name);
+            temp.SubItems.Add(date.ToString("dd/MM/yy HH:mm:ss"));
+            if (run == 1)
+            {
+               
+                listView1.Items.Add(temp);
+                listView1.Update();
+            }
+            else
+            {
+                listView2.Items.Add(temp);
+                listView2.Update();
+            }
+            
+        }
+
+        private void DeleteToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (run == 1)
+            {
+                Delete(selectedFolder1);
+            }
+            else
+            {
+                Delete(selectedFolder2);
+            }
+        }
+
+        private void ShowHiddenToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (this.showHiddenToolStripMenuItem.Checked)
+            {
+                show_hidden = true;
+                
+                LoadListViewR(listView1,selectedFolder1, imageList1, comboBox1, textBox1, listView2);
+                LoadListViewR(listView2, selectedFolder2, imageList2, comboBox2, textBox2, listView1);
+            }
+            else
+            {
+                show_hidden = false;
+                LoadListViewR(listView1, selectedFolder1, imageList1, comboBox1, textBox1, listView2);
+                LoadListViewR(listView2, selectedFolder2, imageList2, comboBox2, textBox2, listView1);
+            }
+            
+            return;
+        }
+
+        private void Button7_Click(object sender, EventArgs e)
+        {
+            listView1.View = View.List;
+            listView2.View = View.List;
+            listView1.Refresh();
+            listView2.Refresh();
+
+        }
+
+        private void Button8_Click(object sender, EventArgs e)
+        {
+            listView1.View = View.Details;
+            listView2.View = View.Details;
+            listView1.Refresh();
+            listView2.Refresh();
+        }
+
+        private void Button9_Click(object sender, EventArgs e)
+        {
+            listView1.View = View.Tile;
+            listView2.View = View.Tile;
+            listView1.Refresh();
+            listView2.Refresh();
+        }
+
+        private void Button10_Click(object sender, EventArgs e)
+        {
+            listView1.View = View.LargeIcon;
+            listView2.View = View.LargeIcon;
+            listView1.Refresh();
+            listView2.Refresh();
+        }
+
+        private void Button11_Click(object sender, EventArgs e)
+        {
+            listView1.Refresh();
+            listView2.Refresh();
         }
 
         private void ComboBox2_SelectedIndexChanged(object sender, EventArgs e)
@@ -728,20 +265,32 @@ namespace FileExplorer
             foreach (string file in fileArray)
             {
                 FileInfo fi = new FileInfo(file);
+                if ((fi.Attributes.HasFlag(FileAttributes.Hidden) && show_hidden == false))
+                {
+                    continue;
+                }
                 long length = fi.Length / 1024;
                 string length_temp = length.ToString();
                 var date = System.IO.File.GetLastWriteTime(file);
                 ListViewItem temp = new ListViewItem(Path.GetFileName(file));
                 temp.Name = file;
+                temp.ImageIndex = sysIcons.GetIconIndex(file);
                 temp.SubItems.Add(Path.GetExtension(file));
                 temp.SubItems.Add(length_temp);
                 temp.SubItems.Add(date.ToString("dd/MM/yy HH:mm:ss"));
                 listView2.Items.Add(temp);
             }
+            imageList2.Images.Add("f", DefaultIcons.FolderLarge.ToBitmap());
             foreach (string folder in folderArray)
             {
+                FileInfo fi = new FileInfo(folder);
+                if ((fi.Attributes.HasFlag(FileAttributes.Hidden) && show_hidden == false))
+                {
+                    continue;
+                }
                 ListViewItem temp = new ListViewItem(Path.GetFileNameWithoutExtension(folder));
                 temp.Name = folder;
+                temp.ImageIndex = sysIcons.GetIconIndex(folder);
                 temp.SubItems.Add(" ");
 
                 temp.SubItems.Add("<DIR>");
@@ -750,12 +299,16 @@ namespace FileExplorer
                 listView2.Items.Add(temp);
             }
             this.listView2.Items[0].Selected = true;
-            //this.listView2.HideSelection = false;
             this.listView2.Items[0].Focused = true;
             return;
         }
 
+        
+        
 
+        
+
+        
         private void ComboBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
             this.comboBox1.Text = this.comboBox1.SelectedItem.ToString();
@@ -771,18 +324,17 @@ namespace FileExplorer
             foreach (string file in fileArray)
             {
                 FileInfo fi = new FileInfo(file);
+                
+                if ((fi.Attributes.HasFlag(FileAttributes.Hidden) && show_hidden == false))
+                {
+                    continue;
+                }
                 long length = fi.Length / 1024;
                 string length_temp = length.ToString();
                 var date = System.IO.File.GetLastWriteTime(file);
                 ListViewItem temp = new ListViewItem(Path.GetFileName(file));
-                
-                if(!imageList1.Images.ContainsKey(fi.Extension))
-                {
-                   
-                    imageList1.Images.Add(fi.Extension, Icon.ExtractAssociatedIcon(file));
-                }
-                int index = imageList1.Images.Keys.IndexOf(fi.Extension);
-                temp.ImageIndex = index;
+
+                temp.ImageIndex = sysIcons.GetIconIndex(file);
                 
                 
                 temp.Name = file;
@@ -792,14 +344,19 @@ namespace FileExplorer
                 listView1.Items.Add(temp);
             }
             //imageList1.Images.Clear();
-            imageList1.Images.Add("f", DefaultIcons.FolderLarge.ToBitmap());
+            //imageList1.Images.Add("f", DefaultIcons.FolderLarge.ToBitmap());
             foreach (string folder in folderArray)
             {
+                FileInfo fi = new FileInfo(folder);
+                if ((fi.Attributes.HasFlag(FileAttributes.Hidden) && show_hidden == false))
+                {
+                    continue;
+                }
                 ListViewItem temp = new ListViewItem(Path.GetFileNameWithoutExtension(folder));
                 temp.Name = folder;
                 temp.SubItems.Add(" ");
                 //var icon = DefaultIcons.FolderLarge;
-                temp.ImageKey = "f";
+                temp.ImageIndex = sysIcons.GetIconIndex(folder);
                 temp.SubItems.Add("<DIR>");
                 var date = Directory.GetLastWriteTime(folder);
                 temp.SubItems.Add(date.ToString("dd/MM/yy HH:mm:ss"));
