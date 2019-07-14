@@ -26,6 +26,7 @@ namespace FileExplorer
             {
                 run = 2;
             }
+            
             string path = list.SelectedItems[0].Name;
             tb.Text = path;
             selectedFolder = path;
@@ -101,7 +102,7 @@ namespace FileExplorer
                         {
                             continue;
                         }
-                        ListViewItem temp = new ListViewItem(Path.GetFileNameWithoutExtension(folder));
+                        ListViewItem temp = new ListViewItem(Path.GetFileName(folder));
                         //Name ở đây là đường dẫn
                         temp.Name = folder;
                         temp.ImageIndex = sysIcons.GetIconIndex(folder);

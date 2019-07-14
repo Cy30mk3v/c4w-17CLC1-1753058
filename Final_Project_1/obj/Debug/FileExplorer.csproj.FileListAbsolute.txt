@@ -8,3 +8,8 @@ C:\Users\ThinkKING\source\repos\FileExplorer\obj\Debug\FileExplorer.csproj.Gener
 C:\Users\ThinkKING\source\repos\FileExplorer\obj\Debug\FileExplorer.csproj.CoreCompileInputs.cache
 C:\Users\ThinkKING\source\repos\FileExplorer\obj\Debug\FileExplorer.exe
 C:\Users\ThinkKING\source\repos\FileExplorer\obj\Debug\FileExplorer.pdb
+C:\Users\ThinkKING\source\repos\FileExplorer\bin\Debug\FileExplorer.exe.manifest
+C:\Users\ThinkKING\source\repos\FileExplorer\bin\Debug\FileExplorer.application
+C:\Users\ThinkKING\source\repos\FileExplorer\obj\Debug\FileExplorer.TrustInfo.xml
+C:\Users\ThinkKING\source\repos\FileExplorer\obj\Debug\FileExplorer.exe.manifest
+C:\Users\ThinkKING\source\repos\FileExplorer\obj\Debug\FileExplorer.application
