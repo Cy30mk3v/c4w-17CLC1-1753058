@@ -16,40 +16,7 @@ namespace FileExplorer
 
     public partial class Form1 : Form
     {
-        public static IEnumerable<string> GetFiles(string root, string searchPattern)
-        {
-            Stack<string> pending = new Stack<string>();
-            pending.Push(root);
-            while (pending.Count != 0)
-            {
-                var path = pending.Pop();
-                string[] next = null;
-                try
-                {
-                    next = Directory.GetFiles(path, searchPattern);
-                }
-                catch { }
-                if (next != null && next.Length != 0)
-                    foreach (var file in next) yield return file;
-                try
-                {
-                    next = Directory.GetDirectories(path);
-                    foreach (var subdir in next) pending.Push(subdir);
-                }
-                catch { }
-            }
-        }
-        static long DirectorySize(DirectoryInfo dInfo, bool includeSubDir)
-        {
-            long totalSize = dInfo.EnumerateFiles()
-                         .Sum(file => file.Length);
-            if (includeSubDir)
-            {
-                totalSize += dInfo.EnumerateDirectories()
-                         .Sum(dir => DirectorySize(dir, true));
-            }
-            return totalSize;
-        }
+       
 
         public static void DeleteDirectory(string target_dir)
         {
@@ -151,7 +118,7 @@ namespace FileExplorer
                         {
                             if (Directory.GetDirectories(key) != null)
                             {
-                                string name = "Folder: " + listView1.Items[key].Text + " contains data, continues?";
+                                string name = "Folder: " + listView2.Items[key].Text + " contains data, continues?";
                                 DialogResult dr = MessageBox.Show(name, "Check", MessageBoxButtons.YesNo);
                                 if (dr == DialogResult.Yes)
                                 {
@@ -164,7 +131,7 @@ namespace FileExplorer
                         else
                         {
 
-                            string name = "Folder: " + listView1.Items[key].Text + " contains data, continues?";
+                            string name = "Folder: " + listView2.Items[key].Text + " contains data, continues?";
                             DialogResult dr = MessageBox.Show(name, "Check", MessageBoxButtons.YesNo);
                             if (dr == DialogResult.Yes)
                             {
@@ -198,7 +165,7 @@ namespace FileExplorer
             if(Directory.Exists(path))
             {
                 path = path + " (";
-                for(int i =1;i<100;i++)
+                for(int i =1;i<10;i++)
                 {
                     path = path + i.ToString() + ")";
 
@@ -221,8 +188,78 @@ namespace FileExplorer
             return path;
             
         }
+       public double size = 0;
+        private double GetDirectorySize(string directory)
+        {
+           
+            foreach (string dir in Directory.GetDirectories(directory))
+            {
+                GetDirectorySize(dir);
+            }
+
+            foreach (FileInfo file in new DirectoryInfo(directory).GetFiles())
+            {
+                size += file.Length;
+            }
+
+            return size;
+        }
+
+
+        bool checkName1(string path)
+        {
+            string[] name;
+            int c;
+            if (run == 1)
+            {
+                name = new string[listView1.Items.Count];
+                 c=listView1.Items.Count;
+                for (int i = 0; i < c; i++)
+                {
+                    if (path == listView1.Items[i].Name)
+                        return true;
+                }
+                return false;
+            }
+            else
+            {
+                name = new string[listView1.Items.Count];
+                c = listView2.Items.Count;
+                for (int i = 0; i < c; i++)
+                {
+                    if (path == listView2.Items[i].Name)
+                        return true;
+                }
+                return false;
+            }
+            
+        }
 
        
+
+        void moveFile()
+        {
+            if (run == 1)
+            {
+                int c = listView1.SelectedItems.Count;
+                bool Over_all;
+                for (int i = 0; i < c; i++)
+                {
+                   if(checkName1(listView1.SelectedItems[i].Name))
+                    {
+                        Form form_Move = new Form();
+                        Button bt_1 = new Button();
+                        bt_1.Text = "Skip all";
+                        Button bt_2 = new Button();
+                        
+                    }
+                }
+            }
+            else
+                return;
+        }
+
+
     }
 }
 

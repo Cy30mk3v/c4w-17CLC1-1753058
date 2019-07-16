@@ -56,6 +56,7 @@ namespace FileExplorer
                     {
                         //Nếu đã chọn quay lại nhưng không phải thư mục gốc
                         ListViewItem temp = new ListViewItem("..");
+                        temp.ImageIndex = sysIcons.GetIconIndex(path1);
                         temp.Name = (Directory.GetParent(path).ToString());
                         list.Items.Add(temp);
                     }
@@ -296,6 +297,7 @@ namespace FileExplorer
                     {
                         //Nếu đã chọn quay lại nhưng không phải thư mục gốc
                         ListViewItem temp = new ListViewItem("..");
+                        temp.ImageIndex = sysIcons.GetIconIndex(path1);
                         temp.Name = (Directory.GetParent(path).ToString());
                         list.Items.Add(temp);
                     }

@@ -13,3 +13,4 @@ C:\Users\ThinkKING\source\repos\FileExplorer\bin\Debug\FileExplorer.application
 C:\Users\ThinkKING\source\repos\FileExplorer\obj\Debug\FileExplorer.TrustInfo.xml
 C:\Users\ThinkKING\source\repos\FileExplorer\obj\Debug\FileExplorer.exe.manifest
 C:\Users\ThinkKING\source\repos\FileExplorer\obj\Debug\FileExplorer.application
+C:\Users\ThinkKING\source\repos\FileExplorer\obj\Debug\FileExplorer.rename.resources
