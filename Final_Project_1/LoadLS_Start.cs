@@ -15,7 +15,7 @@ namespace FileExplorer
 
     public partial class Form1 : Form
     {
-        void LoadListView(ListView list,out string selectedFolder, ImageList image, ComboBox cb, TextBox tb, ListView other)
+        void LoadListView(ListView list,out string selectedFolder, ComboBox cb, TextBox tb, ListView other)
         {
             if (list.Name == "listView1")
             {
@@ -137,7 +137,7 @@ namespace FileExplorer
                 System.Diagnostics.Process.Start(path);
         }
 
-        void LoadListViewR(ListView list, string selectedFolder, ImageList image, ComboBox cb, TextBox tb, ListView other)
+        void LoadListViewR(ListView list, string selectedFolder, ComboBox cb, TextBox tb, ListView other)
         {
             if (list.Name == "listView1")
             {
@@ -259,7 +259,7 @@ namespace FileExplorer
         void copy()
         { 
 }
-        void LoadLSfromTextBox(ListView list, TextBox tb, out string selectedFolder, ImageList image, ComboBox cb, ListView other)
+        void LoadLSfromTextBox(ListView list, TextBox tb, out string selectedFolder, ComboBox cb, ListView other)
         {
             if (tb.Name == "textBox1")
             {
@@ -307,7 +307,12 @@ namespace FileExplorer
                     foreach (string file in fileArray)
                     {
                         //Tên hiện bên ngoài (Text): Là tên file
+
                         FileInfo fi = new FileInfo(file);
+                        if ((fi.Attributes.HasFlag(FileAttributes.Hidden) && show_hidden == false))
+                        {
+                            continue;
+                        }
                         long f1 = fi.Length / 1024;
                         ListViewItem temp = new ListViewItem(Path.GetFileName(file));
                         //Name ở đây là đường dẫn
@@ -325,6 +330,11 @@ namespace FileExplorer
                     }
                     foreach (string folder in folderArray)
                     {
+                        FileInfo fi = new FileInfo(folder);
+                        if ((fi.Attributes.HasFlag(FileAttributes.Hidden) && show_hidden == false))
+                        {
+                            continue;
+                        }
                         ListViewItem temp = new ListViewItem(Path.GetFileNameWithoutExtension(folder));
                         //Name ở đây là đường dẫn
                         temp.Name = folder;

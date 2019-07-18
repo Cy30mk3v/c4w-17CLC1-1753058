@@ -25,6 +25,7 @@ namespace FileExplorer
         bool buffer_contained = false;
         string path1 = AppDomain.CurrentDomain.BaseDirectory;
         string path2;
+        public string cut1, cut2;
         public Form1()
         {
             InitializeComponent();
@@ -85,7 +86,7 @@ namespace FileExplorer
 
         private void ListView1_MouseDoubleClick(object sender, MouseEventArgs e)
         {
-            LoadListView(listView1, out selectedFolder1, imageList1, comboBox1, textBox1, listView2);
+            LoadListView(listView1, out selectedFolder1, comboBox1, textBox1, listView2);
         }
     
 
@@ -101,7 +102,7 @@ namespace FileExplorer
         {
             if (e.KeyCode == Keys.Enter)
             {
-                LoadListView(listView1, out selectedFolder1, imageList1, comboBox1, textBox1, listView2);
+                LoadListView(listView1, out selectedFolder1, comboBox1, textBox1, listView2);
             }
         }
 
@@ -241,7 +242,7 @@ namespace FileExplorer
 
         private void ListView2_MouseDoubleClick(object sender, MouseEventArgs e)
         {
-            LoadListView(listView2, out selectedFolder2, imageList2, comboBox2, textBox2, listView1);
+            LoadListView(listView2, out selectedFolder2, comboBox2, textBox2, listView1);
             run = 2;
         }
 
@@ -249,8 +250,9 @@ namespace FileExplorer
         {
             if(e.KeyCode==Keys.Enter)
             {
-                LoadLSfromTextBox(listView1, textBox1, out selectedFolder1, imageList1, comboBox1, listView2);
+                LoadLSfromTextBox(listView1, textBox1, out selectedFolder1, comboBox1, listView2);
                 run = 1;
+                Button11_Click(sender, e);
             }
             
         }
@@ -259,8 +261,9 @@ namespace FileExplorer
         {
             if(e.KeyCode==Keys.Enter)
             {
-                LoadLSfromTextBox(listView2, textBox2, out selectedFolder2, imageList2, comboBox2, listView1);
+                LoadLSfromTextBox(listView2, textBox2, out selectedFolder2, comboBox2, listView1);
                 run = 2;
+                Button11_Click(sender, e);
             }
         }
 
@@ -282,7 +285,7 @@ namespace FileExplorer
         {
             if (e.KeyCode == Keys.Enter)
             {
-                LoadListView(listView2, out selectedFolder2, imageList2, comboBox2, textBox2, listView1);
+                LoadListView(listView2, out selectedFolder2, comboBox2, textBox2, listView1);
                 run = 2;
             }
         }
@@ -315,6 +318,7 @@ namespace FileExplorer
         private void DeleteToolStripMenuItem_Click(object sender, EventArgs e)
         { 
             delete();
+            Button11_Click(sender, e);
         }
 
         private void ShowHiddenToolStripMenuItem_Click(object sender, EventArgs e)
@@ -323,14 +327,14 @@ namespace FileExplorer
             {
                 show_hidden = true;
                 
-                LoadListViewR(listView1,selectedFolder1, imageList1, comboBox1, textBox1, listView2);
-                LoadListViewR(listView2, selectedFolder2, imageList2, comboBox2, textBox2, listView1);
+                LoadListViewR(listView1,selectedFolder1, comboBox1, textBox1, listView2);
+                LoadListViewR(listView2, selectedFolder2, comboBox2, textBox2, listView1);
             }
             else
             {
                 show_hidden = false;
-                LoadListViewR(listView1, selectedFolder1, imageList1, comboBox1, textBox1, listView2);
-                LoadListViewR(listView2, selectedFolder2, imageList2, comboBox2, textBox2, listView1);
+                LoadListViewR(listView1, selectedFolder1, comboBox1, textBox1, listView2);
+                LoadListViewR(listView2, selectedFolder2, comboBox2, textBox2, listView1);
             }
             
             return;
@@ -453,7 +457,7 @@ namespace FileExplorer
                         listView1.Items.Add(temp);
                     }
 
-                    return;
+                    
                 }
                 catch (UnauthorizedAccessException)
                 {
@@ -470,14 +474,11 @@ namespace FileExplorer
 
             }
 
-            else
-                //Chạy chương trình
-                // this.textBox2.Text = Directory.GetParent(path).ToString();
-                System.Diagnostics.Process.Start(path);
+           
            
 
             path = textBox2.Text;
-            
+           // MessageBox.Show(path);
             selectedFolder2 = path;
             attr = File.GetAttributes(path);
             if ((attr & FileAttributes.Directory) == FileAttributes.Directory)
@@ -505,6 +506,7 @@ namespace FileExplorer
                     {
                         //Nếu đã chọn quay lại nhưng không phải thư mục gốc
                         ListViewItem temp = new ListViewItem("..");
+                        temp.ImageIndex = sysIcons.GetIconIndex(path1);
                         temp.Name = (Directory.GetParent(path).ToString());
                         listView2.Items.Add(temp);
                     }
@@ -529,14 +531,7 @@ namespace FileExplorer
 
 
                         temp.ImageIndex = sysIcons.GetIconIndex(file);
-                        /*f (fi.Extension == ".lnk")
-                        {
-                            index = imageList3.Images.Keys.IndexOf(fi.FullName);
-                            temp.ImageIndex = index;
-                        }*/
-                        /* else*/
-
-                        //temp.Name = file;
+               
 
                         temp.SubItems.Add(Path.GetExtension(file));
                         temp.SubItems.Add(f1.ToString());
@@ -562,7 +557,7 @@ namespace FileExplorer
                         listView2.Items.Add(temp);
                     }
 
-                    return;
+                 
                 }
                 catch (UnauthorizedAccessException)
                 {
@@ -573,9 +568,7 @@ namespace FileExplorer
 
                 //listView2.Items[0].Selected = true;
 
-                listView1.HideSelection = true;
-                listView2.HideSelection = false;
-                listView2.Items[0].Focused = true;
+               
 
             }
 
@@ -594,7 +587,7 @@ namespace FileExplorer
             if (e.Button == MouseButtons.Right)
             {
                 //MessageBox.Show(listView1.SelectedItems.Count.ToString());
-                listView1.ContextMenuStrip = contextMenuStrip3;
+                listView1.ContextMenuStrip = Empty;
                 if (listView1.SelectedItems.Count>0)
                 {
                     path = listView1.FocusedItem.Name;
@@ -620,8 +613,8 @@ namespace FileExplorer
                 }
                 else
                 {
-                    listView1.ContextMenuStrip = contextMenuStrip3;
-                    contextMenuStrip3.Show(Cursor.Position);
+                    listView1.ContextMenuStrip = Empty;
+                    Empty.Show(Cursor.Position);
                 }
             }
         }
@@ -661,6 +654,7 @@ namespace FileExplorer
         private void ToolStripMenuItem1_Click(object sender, EventArgs e)
         {
             delete();
+            Button11_Click(sender, e);
         }
 
         private void ListView1_ItemMouseHover_1(object sender, ListViewItemMouseHoverEventArgs e)
@@ -683,7 +677,7 @@ namespace FileExplorer
             if (selected == null)
             {
                 base.Cursor = Cursors.Default;
-                listView1.ContextMenuStrip = contextMenuStrip3;
+                listView1.ContextMenuStrip = Empty;
             }
             else
             {
@@ -812,10 +806,7 @@ namespace FileExplorer
                     RichTextBox rich = new RichTextBox();
                     rich.ReadOnly = true;
                     rich.Size = temp.Size;
-                    //string line;
-
-
-
+                  
                     rich.Clear();
                     rich.AppendText(File.ReadAllText(path));
                     temp.Controls.Add(rich);
@@ -932,7 +923,7 @@ namespace FileExplorer
                 {
                     rename form_temp = new rename();
                    
-                    MessageBox.Show(listView1.SelectedItems[i].Name);
+                   
                     FileAttributes attr = File.GetAttributes(listView1.SelectedItems[i].Name);
                     
                     if ((attr & FileAttributes.Directory) == FileAttributes.Directory)
@@ -951,17 +942,10 @@ namespace FileExplorer
                             form_temp.ShowDialog();
                             new_name = form_temp.new_Path;
                             path_Wo_ex += new_name;
-                            MessageBox.Show(checkName1(path_Wo_ex).ToString());
                         } while (checkName1(path_Wo_ex));
-                        
-
-
-
-                        //listView1.Items[name1].Remove();
-                        //listView1.Update();
-                        //MessageBox.Show(listView1.SelectedItems[0].Name);
-                        //MessageBox.Show(path_Wo_ex);
+                   
                         form_temp.Close();
+                       
                         Directory.Move(listView1.SelectedItems[i].Name, path_Wo_ex);
                     }
                     else
@@ -981,7 +965,6 @@ namespace FileExplorer
                             form_temp.ShowDialog();
                             new_name = form_temp.new_Path;
                             deleted[i] = listView1.SelectedItems[i].Name;
-                            ListViewItem temp = new ListViewItem();
                         } while (checkName1(path + @"\" + new_name + ext));
                         File.Move(listView1.SelectedItems[i].Name,path + @"\" + new_name + ext);
 
@@ -1004,6 +987,579 @@ namespace FileExplorer
         private void ContextMenuStrip1_Opening(object sender, CancelEventArgs e)
         {
 
+        }
+
+        private void PasteToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void CutToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void MoveToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            if (run == 1)
+            {
+                if (textBox1.Text == textBox2.Text)
+                {
+                    RenameToolStripMenuItem1_Click(sender, e);
+                    Button11_Click(sender, e);
+                    return;
+                }
+                int c = listView1.SelectedItems.Count;
+                bool Over_Write, Over_Write_A, Skip, Skip_A, Quit, choose_1by1;
+                Over_Write = Over_Write_A = Skip = Skip_A = Quit = choose_1by1 = false;
+                int count = 0;
+                for (int i = 0; i < c; i++)
+                {
+                    if (checkName1(listView1.SelectedItems[i].Text)==true)
+                    { 
+                        count++;
+                    }
+                }
+                
+                
+                if (count > 1)
+                {
+                    Check_Copy_Cut_Movecs form = new Check_Copy_Cut_Movecs();
+                    form.ShowDialog();
+                    form.getText(out cut2);
+                    if (cut2 == "Overwrite All")
+                    {
+                        Over_Write_A = true;
+                    }
+
+                    if (cut2 == "Skip All")
+                    {
+                        Skip_A = true;
+                    }
+
+                    if (cut2 == "Choose one by one")
+                    {
+                        choose_1by1 = true;
+                    }
+                    if (cut2 == "Quit")
+                    {
+                        return;
+                    }
+
+                }
+
+                if (Over_Write_A==true)
+                {
+                    
+                    for (int i = 0; i < c; i++)
+                    {
+                        string dest = textBox2.Text;
+                        if(listView1.SelectedItems[i].Text=="..")
+                        {
+                            continue;
+                        }
+                        if(checkTextBox(listView1.SelectedItems[i].Name))
+                        {
+                            MessageBox.Show("Can't move this because overwrite parent directory!");
+                            continue;
+                        }
+                        if (checkName1(listView1.SelectedItems[i].Text))
+                        {
+                            
+                            
+                            //MessageBox.Show(listView1.SelectedItems[i].Text);
+                            FileAttributes attr = File.GetAttributes(listView1.SelectedItems[i].Name);
+
+                            if ((attr & FileAttributes.Directory) == FileAttributes.Directory)
+                            {
+                               // MessageBox.Show(listView1.SelectedItems[i].Name);
+                                //MessageBox.Show(textBox2.Text);
+                                Directory.Delete(textBox2.Text + @"\" + listView1.SelectedItems[i].Text,true);
+                                Directory.Move(listView1.SelectedItems[i].Name, textBox2.Text + @"\" + listView1.SelectedItems[i].Text);
+                               
+                            }
+                            else
+                            {
+                                File.Delete(textBox2.Text + @"\" + listView1.SelectedItems[i].Text);
+                                File.Move(listView1.SelectedItems[i].Name, textBox2.Text + @"\" + listView1.SelectedItems[i].Text);
+                            }
+                            
+                        }
+                        else
+                        {
+                            FileAttributes attr = File.GetAttributes(listView1.SelectedItems[i].Name);
+
+                            if ((attr & FileAttributes.Directory) == FileAttributes.Directory)
+                            {
+                                Directory.Move(listView1.SelectedItems[i].Name, textBox2.Text + @"\" + listView1.SelectedItems[i].Text);
+                            }
+                            else
+                            {
+                                File.Move(listView1.SelectedItems[i].Name, textBox2.Text + @"\" + listView1.SelectedItems[i].Text);
+                            }
+                        }
+                        
+                    }
+                    Button11_Click(sender, e);
+                    return;
+                }
+                if (Skip_A)
+                {
+                    for (int i = 0; i < c; i++)
+                    {
+                        string dest = textBox2.Text;
+                        if (checkName1(listView1.SelectedItems[i].Text))
+                        {
+                            continue;
+                        }
+                        else
+                        {
+                            FileAttributes attr = File.GetAttributes(listView1.SelectedItems[i].Name);
+
+                            if ((attr & FileAttributes.Directory) == FileAttributes.Directory)
+                            {
+                                Directory.Move(listView1.SelectedItems[i].Name, textBox2.Text + @"\" + listView1.SelectedItems[i].Text);
+                            }
+                            else
+                            {
+                                File.Move(listView1.SelectedItems[i].Name, textBox2.Text + @"\" + listView1.SelectedItems[i].Text);
+                            }
+                        }
+                    }
+                    Button11_Click(sender, e);
+                }
+                if (choose_1by1)
+                {
+                    for (int i = 0; i < c; i++)
+                    {
+                        string dest = textBox2.Text;
+
+                        if (checkName1(listView1.SelectedItems[i].Text))
+                        {
+                            Form2 form2 = new Form2(listView1.SelectedItems[i].Text);
+                            form2.ShowDialog();
+                            form2.getText(out cut1);
+                            if (cut1 == "Skip")
+                            {
+                                continue;
+                            }
+                            if (cut1 == "Quit")
+                            {
+                                return;
+                            }
+                            else
+                            {
+                                if (checkTextBox(listView1.SelectedItems[i].Name))
+                                {
+                                    MessageBox.Show("Can't move this because overwrite parent directory!");
+                                    continue;
+                                }
+                                FileAttributes attr = File.GetAttributes(listView1.SelectedItems[i].Name);
+
+                                if ((attr & FileAttributes.Directory) == FileAttributes.Directory)
+                                {
+                                    Directory.Delete(textBox2.Text + @"\" + listView1.SelectedItems[i].Text,true);
+                                    Directory.Move(listView1.SelectedItems[i].Name, textBox2.Text + @"\" + listView1.SelectedItems[i].Text);
+                                }
+                                else
+                                {
+                                    File.Delete(textBox2.Text + @"\" + listView1.SelectedItems[i].Text);
+                                    File.Move(listView1.SelectedItems[i].Name, textBox2.Text + @"\" + listView1.SelectedItems[i].Text);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            FileAttributes attr = File.GetAttributes(listView1.SelectedItems[i].Name);
+
+                            if ((attr & FileAttributes.Directory) == FileAttributes.Directory)
+                            {
+                                Directory.Move(listView1.SelectedItems[i].Name, textBox2.Text + @"\" + listView1.SelectedItems[i].Text);
+                            }
+                            else
+                            {
+                                File.Move(listView1.SelectedItems[i].Name, textBox2.Text + @"\" + listView1.SelectedItems[i].Text);
+                            }
+                        }
+
+                    }
+                    Button11_Click(sender, e);
+                }
+                //MessageBox.Show(count.ToString());
+                if (count == 1)
+                {
+                    for (int i = 0; i < c; i++)
+                    {
+                        string dest = textBox2.Text;
+                        //MessageBox.Show(listView1.SelectedItems[i].Text);
+                        if (checkTextBox(listView1.SelectedItems[i].Name))
+                        {
+                            MessageBox.Show("Can't move this because overwrite parent directory!");
+                            continue;
+                        }
+                        if (checkName1(listView1.SelectedItems[i].Text))
+                        {
+                            Form2 form2 = new Form2(listView1.SelectedItems[i].Text);
+
+                            form2.ShowDialog();
+                            form2.getText(out cut1);
+                            //MessageBox.Show(cut1);
+                            if (cut1 == "Quit")
+                            {
+                                return;
+                            }
+                            if (cut1 == "Skip")
+                            {
+                                continue;
+                            }
+                            else
+                            {
+                                
+                                FileAttributes attr = File.GetAttributes(listView1.SelectedItems[i].Name);
+
+                                if ((attr & FileAttributes.Directory) == FileAttributes.Directory)
+                                {
+                                    Directory.Delete(textBox2.Text + @"\" + listView1.SelectedItems[i].Text,true);
+                                    Directory.Move(listView1.SelectedItems[i].Name, textBox2.Text + @"\" + listView1.SelectedItems[i].Text);
+                                }
+                                else
+                                {
+                                    File.Delete(textBox2.Text + @"\" + listView1.SelectedItems[i].Text);
+                                    File.Move(listView1.SelectedItems[i].Name, textBox2.Text + @"\" + listView1.SelectedItems[i].Text);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            FileAttributes attr = File.GetAttributes(listView1.SelectedItems[i].Name);
+
+                            if ((attr & FileAttributes.Directory) == FileAttributes.Directory)
+                            {
+                                Directory.Move(listView1.SelectedItems[i].Name, textBox2.Text + @"\" + listView1.SelectedItems[i].Text);
+                            }
+                            else
+                            {
+                                File.Move(listView1.SelectedItems[i].Name, textBox2.Text + @"\" + listView1.SelectedItems[i].Text);
+                            }
+                        }
+
+                    }
+                    Button11_Click(sender, e);
+                }
+                if (count == 0)
+                {
+
+                    for (int i = 0; i < c; i++)
+                    {
+                        FileAttributes attr = File.GetAttributes(listView1.SelectedItems[i].Name);
+
+                        if ((attr & FileAttributes.Directory) == FileAttributes.Directory)
+                        {
+                            Directory.Move(listView1.SelectedItems[i].Name, textBox2.Text + @"\" + listView1.SelectedItems[i].Text);
+                        }
+                        else
+                        {
+
+                            File.Move(listView1.SelectedItems[i].Name, textBox2.Text + @"\" + listView1.SelectedItems[i].Text);
+                        }
+                    }
+                    Button11_Click(sender, e);
+                }
+            }
+            else
+            {
+                if (textBox1.Text == textBox2.Text)
+                {
+                    RenameToolStripMenuItem1_Click(sender, e);
+                    Button11_Click(sender, e);
+                    return;
+                }
+                int c = listView2.SelectedItems.Count;
+                bool Over_Write, Over_Write_A, Skip, Skip_A, Quit, choose_1by1;
+                Over_Write = Over_Write_A = Skip = Skip_A = Quit = choose_1by1 = false;
+                int count = 0;
+                for (int i = 0; i < c; i++)
+                {
+                    if (checkName1(listView2.SelectedItems[i].Text)==true)
+                    {
+                        count++;
+                    }
+                }
+                //MessageBox.Show(count.ToString());
+                if (count > 1)
+                {
+                    Check_Copy_Cut_Movecs form = new Check_Copy_Cut_Movecs();
+                    form.ShowDialog();
+                    form.getText(out cut2);
+                    if (cut2 == "Overwrite All")
+                    {
+                        Over_Write_A = true;
+                    }
+
+                    if (cut2 == "Skip All")
+                    {
+                        Skip_A = true;
+                    }
+
+                    if (cut2 == "Choose one by one")
+                    {
+                        choose_1by1 = true;
+                    }
+                    if (cut2 == "Quit")
+                    {
+                        return;
+                    }
+
+                }
+
+                //MessageBox.Show(cut2);
+                if (Over_Write_A)
+                {
+                    for (int i = 0; i < c; i++)
+                    {
+                        //string dest = textBox1.Text;
+                        //MessageBox.Show(listView2.SelectedItems[i].Text);
+                        if (checkTextBox(listView2.SelectedItems[i].Name))
+                        {
+                            MessageBox.Show("Can't move this because overwrite parent directory!");
+                            continue;
+                        }
+                        if (listView2.SelectedItems[i].Text=="..")
+                        {
+                            continue;
+                        }
+                        if (checkName1(listView2.SelectedItems[i].Text)==true)
+                        {
+
+                            FileAttributes attr = File.GetAttributes(listView2.SelectedItems[i].Name);
+
+                            if ((attr & FileAttributes.Directory) == FileAttributes.Directory)
+                            {
+
+                                //MessageBox.Show("Right");
+                                //MessageBox.Show("1");
+                                Directory.Delete(textBox1.Text + @"\" + listView2.SelectedItems[i].Text,true);
+                                Directory.Move(listView2.SelectedItems[i].Name, textBox1.Text + @"\" + listView2.SelectedItems[i].Text);
+                            }
+                            else
+                            {
+                               // MessageBox.Show("2");
+                                File.Delete(textBox1.Text + @"\" + listView2.SelectedItems[i].Text);
+                                File.Move(listView2.SelectedItems[i].Name, textBox1.Text + @"\" + listView2.SelectedItems[i].Text);
+                            }
+                        }
+                        else
+                        {
+                            FileAttributes attr = File.GetAttributes(listView2.SelectedItems[i].Name);
+
+                            if ((attr & FileAttributes.Directory) == FileAttributes.Directory)
+                            {
+                               // MessageBox.Show("3");
+                                Directory.Move(listView2.SelectedItems[i].Name, textBox1.Text + @"\" + listView2.SelectedItems[i].Text);
+                            }
+                            else
+                            {
+                                //MessageBox.Show("4");
+                                File.Move(listView2.SelectedItems[i].Name, textBox1.Text + @"\" + listView2.SelectedItems[i].Text);
+                            }
+                        }
+                    }
+                    Button11_Click(sender, e);
+                }
+                if (Skip_A)
+                {
+                    for (int i = 0; i < c; i++)
+                    {
+                        string dest = textBox1.Text;
+                        if (checkName1(listView2.SelectedItems[i].Text))
+                        {
+                            continue;
+                        }
+                        else
+                        {
+                            FileAttributes attr = File.GetAttributes(listView2.SelectedItems[i].Name);
+
+                            if ((attr & FileAttributes.Directory) == FileAttributes.Directory)
+                            {
+                                Directory.Move(listView2.SelectedItems[i].Name, textBox1.Text + @"\" + listView2.SelectedItems[i].Text);
+                            }
+                            else
+                            {
+                                File.Move(listView2.SelectedItems[i].Name, textBox1.Text + @"\" + listView2.SelectedItems[i].Text);
+                            }
+                        }
+                    }
+                    Button11_Click(sender, e);
+                }
+                if (choose_1by1)
+                {
+                    for (int i = 0; i < c; i++)
+                    {
+                        string dest = textBox1.Text;
+                        if(listView2.SelectedItems[i].Text=="..")
+                        {
+                            continue;
+                        }
+                        if (checkName1(listView2.SelectedItems[i].Text))
+                        {
+                            MessageBox.Show("Yay");
+                            Form2 form2 = new Form2(listView2.SelectedItems[i].Text);
+                            form2.ShowDialog();
+                            form2.getText(out cut1);
+                            if (cut1 == "Skip")
+                            {
+                                continue;
+                            }
+                            if (cut1 == "Quit")
+                            {
+                                return;
+                            }
+                            else
+                            {
+                                FileAttributes attr = File.GetAttributes(listView2.SelectedItems[i].Name);
+
+                                if ((attr & FileAttributes.Directory) == FileAttributes.Directory)
+                                {
+                                    Directory.Delete(textBox1.Text + @"\" + listView2.SelectedItems[i].Text, true);
+                                    Directory.Move(listView2.SelectedItems[i].Name, textBox1.Text + @"\" + listView2.SelectedItems[i].Text);
+                                }
+                                else
+                                {
+                                    File.Delete(textBox1.Text + @"\" + listView2.SelectedItems[i].Text);
+                                    File.Move(listView2.SelectedItems[i].Name, textBox1.Text + @"\" + listView2.SelectedItems[i].Text);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            FileAttributes attr = File.GetAttributes(listView2.SelectedItems[i].Name);
+
+                            if ((attr & FileAttributes.Directory) == FileAttributes.Directory)
+                            {
+                                Directory.Move(listView2.SelectedItems[i].Name, textBox1.Text + @"\" + listView2.SelectedItems[i].Text);
+                            }
+                            else
+                            {
+                                File.Move(listView2.SelectedItems[i].Name, textBox1.Text + @"\" + listView2.SelectedItems[i].Text);
+                            }
+                        }
+
+                    }
+                    Button11_Click(sender, e);
+                }
+                if (count == 1)
+                {
+                    for (int i = 0; i < c; i++)
+                    {
+                        string dest = textBox2.Text;
+
+                        if (checkTextBox(listView2.SelectedItems[i].Name))
+                        {
+                            MessageBox.Show("Can't move this because overwrite parent directory!");
+                            continue;
+                        }
+
+                        if (checkName1(listView2.SelectedItems[i].Text))
+                        {
+                            Form2 form2 = new Form2(listView2.SelectedItems[i].Text);
+
+                            form2.ShowDialog();
+                            form2.getText(out cut1);
+                            //MessageBox.Show(cut1);
+                            if (cut1 == "Quit")
+                            {
+                                return;
+                            }
+                            if (cut1 == "Skip")
+                            {
+                                continue;
+                            }
+
+                            
+                            else
+                            {
+                                FileAttributes attr = File.GetAttributes(listView2.SelectedItems[i].Name);
+
+                                if ((attr & FileAttributes.Directory) == FileAttributes.Directory)
+                                {
+                                    Directory.Delete(textBox1.Text + @"\" + listView2.SelectedItems[i].Text);
+                                    Directory.Move(listView2.SelectedItems[i].Name, textBox1.Text + @"\" + listView2.SelectedItems[i].Text);
+                                }
+                                else
+                                {
+                                    File.Delete(textBox1.Text + @"\" + listView2.SelectedItems[i].Text);
+                                    File.Move(listView2.SelectedItems[i].Name, textBox1.Text + @"\" + listView2.SelectedItems[i].Text);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            FileAttributes attr = File.GetAttributes(listView2.SelectedItems[i].Name);
+
+                            if ((attr & FileAttributes.Directory) == FileAttributes.Directory)
+                            {
+                                Directory.Move(listView2.SelectedItems[i].Name, textBox1.Text + @"\" + listView2.SelectedItems[i].Text);
+                            }
+                            else
+                            {
+                                File.Move(listView2.SelectedItems[i].Name, textBox1.Text + @"\" + listView2.SelectedItems[i].Text);
+                            }
+                        }
+
+                    }
+                    Button11_Click(sender, e);
+                }
+                if (count == 0)
+                {
+
+                    for (int i = 0; i < c; i++)
+                    {
+                        FileAttributes attr = File.GetAttributes(listView2.SelectedItems[i].Name);
+
+                        if ((attr & FileAttributes.Directory) == FileAttributes.Directory)
+                        {
+                            Directory.Move(listView2.SelectedItems[i].Name, textBox1.Text + @"\" + listView2.SelectedItems[i].Text);
+                        }
+                        else
+                        {
+
+                            File.Move(listView2.SelectedItems[i].Name, textBox1.Text + @"\" + listView2.SelectedItems[i].Text);
+                        }
+                    }
+                    Button11_Click(sender, e);
+                }
+            }
+        }
+
+        private void MoveToolStripMenuItem2_Click(object sender, EventArgs e)
+        {
+            MoveToolStripMenuItem1_Click(sender, e);
+        }
+
+        private void CheckToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            
+        }
+
+        private void DeleteToolStripMenuItem2_Click(object sender, EventArgs e)
+        {
+            delete();
+            Button11_Click(sender, e);
+        }
+
+        private void MoveToolStripMenuItem3_Click(object sender, EventArgs e)
+        {
+            MoveToolStripMenuItem1_Click(sender, e);
+        }
+
+        private void Button4_Click(object sender, EventArgs e)
+        {
+            MoveToolStripMenuItem1_Click(sender, e);
+        }
+
+        private void CheckToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            
         }
 
         private void ComboBox2_SelectedIndexChanged(object sender, EventArgs e)
@@ -1036,7 +1592,7 @@ namespace FileExplorer
                 temp.SubItems.Add(date.ToString("dd/MM/yy HH:mm:ss"));
                 listView2.Items.Add(temp);
             }
-            imageList2.Images.Add("f", DefaultIcons.FolderLarge.ToBitmap());
+            
             foreach (string folder in folderArray)
             {
                 FileInfo fi = new FileInfo(folder);

@@ -14,3 +14,5 @@ C:\Users\ThinkKING\source\repos\FileExplorer\obj\Debug\FileExplorer.TrustInfo.xm
 C:\Users\ThinkKING\source\repos\FileExplorer\obj\Debug\FileExplorer.exe.manifest
 C:\Users\ThinkKING\source\repos\FileExplorer\obj\Debug\FileExplorer.application
 C:\Users\ThinkKING\source\repos\FileExplorer\obj\Debug\FileExplorer.rename.resources
+C:\Users\ThinkKING\source\repos\FileExplorer\obj\Debug\FileExplorer.Check_Copy_Cut_Movecs.resources
+C:\Users\ThinkKING\source\repos\FileExplorer\obj\Debug\FileExplorer.Form2.resources

@@ -50,30 +50,35 @@ namespace FileExplorer
                     if (result == DialogResult.No)
                         return;
                     string key = listView1.SelectedItems[0].Name;
-                    MessageBox.Show(key);
+                    //MessageBox.Show(key);
                     FileAttributes attr = File.GetAttributes(key);
                     if ((attr & FileAttributes.Directory) != FileAttributes.Directory)
                     {
                         File.Delete(key);
-                        listView1.Items[key].Remove();
-                        listView1.Update();
+                        
                         continue;
                     }
                     else
 
                     {
-                        if (!Directory.EnumerateFiles(key).Any())
+                        //
+                        if (!Directory.EnumerateFileSystemEntries(key).Any())
                         {
-                            if (Directory.GetDirectories(key) != null)
+                            if (Directory.GetDirectories(key).Length != 0)
                             {
+                                //MessageBox.Show("Has empty folder inside");
                                 string name = "Folder: " + listView1.Items[key].Text + " contains data, continues?";
-                                DialogResult dr = MessageBox.Show(name, "Check", MessageBoxButtons.YesNo);
-                                if (dr == DialogResult.Yes)
+                               // DialogResult dr = MessageBox.Show(name, "Check", MessageBoxButtons.YesNo);
+                               // if (dr == DialogResult.Yes)
                                 {
                                     DeleteDirectory(key);
-                                    listView1.Items[key].Remove();
-                                    listView1.Update();
+                                   
                                 }
+                            }
+                            else
+                            {
+                                DeleteDirectory(key);
+                               
                             }
                         }
                         else
@@ -84,8 +89,7 @@ namespace FileExplorer
                             if (dr == DialogResult.Yes)
                             {
                                 DeleteDirectory(key);
-                                listView1.Items[key].Remove();
-                                listView1.Update();
+                                
                             }
 
                         }
@@ -116,7 +120,7 @@ namespace FileExplorer
                     {
                         if (!Directory.EnumerateFiles(key).Any())
                         {
-                            if (Directory.GetDirectories(key) != null)
+                            if (Directory.GetDirectories(key).Length != 0)
                             {
                                 string name = "Folder: " + listView2.Items[key].Text + " contains data, continues?";
                                 DialogResult dr = MessageBox.Show(name, "Check", MessageBoxButtons.YesNo);
@@ -126,6 +130,12 @@ namespace FileExplorer
                                     listView2.Items[key].Remove();
                                     listView2.Update();
                                 }
+                            }
+                            else
+                            {
+                                DeleteDirectory(key);
+                                listView2.Items[key].Remove();
+                                listView2.Update();
                             }
                         }
                         else
@@ -159,7 +169,7 @@ namespace FileExplorer
             {
                 path = selectedFolder2;
             }
-            string add = @"\New Folder";
+            string add = @"\New folder";
             path += add;
             //MessageBox.Show(add);
             if(Directory.Exists(path))
@@ -206,28 +216,34 @@ namespace FileExplorer
         }
 
 
-        bool checkName1(string path)
+        bool checkName1(string Name)
         {
             string[] name;
             int c;
             if (run == 1)
             {
-                name = new string[listView1.Items.Count];
-                 c=listView1.Items.Count;
+                //name = new string[listView2.Items.Count];
+                c=listView2.Items.Count;
                 for (int i = 0; i < c; i++)
                 {
-                    if (path == listView1.Items[i].Name)
+                    //MessageBox.Show(Name);
+                    //MessageBox.Show(listView2.Items[i].Text);
+                    if (Name == listView2.Items[i].Text)
+                    {
+                        //MessageBox.Show("aaa");
                         return true;
+                    }
+                   
                 }
                 return false;
             }
             else
             {
-                name = new string[listView1.Items.Count];
-                c = listView2.Items.Count;
+                //name = new string[listView1.Items.Count];
+                c = listView1.Items.Count;
                 for (int i = 0; i < c; i++)
                 {
-                    if (path == listView2.Items[i].Name)
+                    if (Name == listView1.Items[i].Text)
                         return true;
                 }
                 return false;
@@ -235,30 +251,51 @@ namespace FileExplorer
             
         }
 
-       
 
-        void moveFile()
+        bool checkIFRoot(string path)
         {
-            if (run == 1)
+            for (int i = 0; i < comboBox1.Items.Count; i++)
             {
-                int c = listView1.SelectedItems.Count;
-                bool Over_all;
-                for (int i = 0; i < c; i++)
+                if (path == comboBox1.Items[i].ToString())
                 {
-                   if(checkName1(listView1.SelectedItems[i].Name))
-                    {
-                        Form form_Move = new Form();
-                        Button bt_1 = new Button();
-                        bt_1.Text = "Skip all";
-                        Button bt_2 = new Button();
-                        
-                    }
+                    return true;
                 }
             }
-            else
-                return;
+            return false;
         }
 
+        string getFolderfromPath(string path)
+        {
+            int index = path.LastIndexOf(@"\");
+            string folder_name = path.Substring(index + 1);
+            return folder_name;
+        }
+        bool checkTextBox(string path)
+        {
+            
+            
+            if(run==1)
+            {
+                DirectoryInfo d1 = new DirectoryInfo(textBox1.Text);
+                DirectoryInfo d2 = new DirectoryInfo(textBox2.Text);
+                
+                if (d1.Parent == d2 && getFolderfromPath(path) == getFolderfromPath(textBox1.Text))
+                    return true;
+                return false;
+            }
+            else
+            {
+                DirectoryInfo d1 = new DirectoryInfo(textBox1.Text);
+                DirectoryInfo d2 = new DirectoryInfo(textBox2.Text);
+                if (d1 == d2.Parent && getFolderfromPath(path) == getFolderfromPath(textBox2.Text))
+                    return true;
+                return false;
+            }
+        }
+
+       
+
+        
 
     }
 }
