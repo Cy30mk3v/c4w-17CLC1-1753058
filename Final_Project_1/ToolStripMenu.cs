@@ -24,9 +24,6 @@ namespace FileExplorer
             Application.Exit();
         }
 
-        private void HelpToolStripMenuItem1_Click(object sender, EventArgs e)
-        {
-
-        }
+       
     }
 }

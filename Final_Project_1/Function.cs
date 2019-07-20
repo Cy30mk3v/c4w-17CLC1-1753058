@@ -361,6 +361,7 @@ namespace FileExplorer
             {
                 Directory.CreateDirectory(path);
             }
+            button11.PerformClick();
             return path;
             
         }

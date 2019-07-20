@@ -56,7 +56,7 @@ namespace FileExplorer
                     {
                         //Nếu đã chọn quay lại nhưng không phải thư mục gốc
                         ListViewItem temp = new ListViewItem("..");
-                        temp.ImageIndex = sysIcons.GetIconIndex(path1);
+                        temp.ImageIndex = img.Images.IndexOfKey("..");
                         temp.Name = (Directory.GetParent(path).ToString());
                         list.Items.Add(temp);
                     }
@@ -80,16 +80,10 @@ namespace FileExplorer
 
 
 
-                        temp.ImageIndex = sysIcons.GetIconIndex(file);
-                        /*f (fi.Extension == ".lnk")
-                        {
-                            index = imageList3.Images.Keys.IndexOf(fi.FullName);
-                            temp.ImageIndex = index;
-                        }*/
-                       /* else*/
-                        
-                        //temp.Name = file;
 
+                     
+                        img.Images.Add(file, Icon.ExtractAssociatedIcon(file));
+                        temp.ImageIndex= img.Images.Keys.IndexOf(file);
                         temp.SubItems.Add(Path.GetExtension(file));
                         temp.SubItems.Add(f1.ToString());
                         var date = System.IO.File.GetLastWriteTime(file);
@@ -106,7 +100,8 @@ namespace FileExplorer
                         ListViewItem temp = new ListViewItem(Path.GetFileName(folder));
                         //Name ở đây là đường dẫn
                         temp.Name = folder;
-                        temp.ImageIndex = sysIcons.GetIconIndex(folder);
+                        //img.Images.Add(folder, Icon.ExtractAssociatedIcon(folder));
+                        temp.ImageIndex = img.Images.Keys.IndexOf("folder");
                         temp.SubItems.Add(" ");
                         temp.SubItems.Add("<DIR>");
                         var date = Directory.GetLastWriteTime(folder);
@@ -177,6 +172,7 @@ namespace FileExplorer
                     {
                         //Nếu đã chọn quay lại nhưng không phải thư mục gốc
                         ListViewItem temp = new ListViewItem("..");
+                        temp.ImageIndex = img.Images.IndexOfKey("..");
                         temp.Name = (Directory.GetParent(path).ToString());
                         list.Items.Add(temp);
                     }
@@ -199,8 +195,8 @@ namespace FileExplorer
                         temp.Name = file;
 
 
-
-                        temp.ImageIndex = sysIcons.GetIconIndex(file);
+                        img.Images.Add(file, Icon.ExtractAssociatedIcon(file));
+                        temp.ImageIndex = img.Images.Keys.IndexOf(file);
                         /*f (fi.Extension == ".lnk")
                         {
                             index = imageList3.Images.Keys.IndexOf(fi.FullName);
@@ -226,7 +222,7 @@ namespace FileExplorer
                         ListViewItem temp = new ListViewItem(Path.GetFileNameWithoutExtension(folder));
                         //Name ở đây là đường dẫn
                         temp.Name = folder;
-                        temp.ImageIndex = sysIcons.GetIconIndex(folder);
+                        temp.ImageIndex = img.Images.IndexOfKey("folder");
                         temp.SubItems.Add(" ");
                         temp.SubItems.Add("<DIR>");
                         var date = Directory.GetLastWriteTime(folder);
@@ -297,7 +293,7 @@ namespace FileExplorer
                     {
                         //Nếu đã chọn quay lại nhưng không phải thư mục gốc
                         ListViewItem temp = new ListViewItem("..");
-                        temp.ImageIndex = sysIcons.GetIconIndex(path1);
+                        temp.ImageIndex = img.Images.IndexOfKey("..");
                         temp.Name = (Directory.GetParent(path).ToString());
                         list.Items.Add(temp);
                     }
@@ -316,11 +312,11 @@ namespace FileExplorer
                         long f1 = fi.Length / 1024;
                         ListViewItem temp = new ListViewItem(Path.GetFileName(file));
                         //Name ở đây là đường dẫn
-                      
-                        
 
 
-                        temp.ImageIndex = sysIcons.GetIconIndex(file);
+                        img.Images.Add(file, Icon.ExtractAssociatedIcon(file));
+
+                        temp.ImageIndex = img.Images.Keys.IndexOf(file);
                         temp.Name = file;
                         temp.SubItems.Add(Path.GetExtension(file));
                         temp.SubItems.Add(f1.ToString());
@@ -338,7 +334,7 @@ namespace FileExplorer
                         ListViewItem temp = new ListViewItem(Path.GetFileNameWithoutExtension(folder));
                         //Name ở đây là đường dẫn
                         temp.Name = folder;
-                        temp.ImageIndex = sysIcons.GetIconIndex(folder);
+                        temp.ImageIndex = img.Images.Keys.IndexOf("folder");
                         temp.SubItems.Add(" ");
                         temp.SubItems.Add("<DIR>");
                         var date = Directory.GetLastWriteTime(folder);
