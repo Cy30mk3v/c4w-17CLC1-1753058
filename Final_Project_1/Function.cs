@@ -46,10 +46,14 @@ namespace FileExplorer
                 int c = listView1.SelectedItems.Count;
                 for (int i = 0; i < c; i++)
                 {
+                    if(listView1.SelectedItems[i].Text=="..")
+                    {
+                        continue;
+                    }
                     DialogResult result = MessageBox.Show("     Do you want to delete this?", "Check", MessageBoxButtons.YesNo);
                     if (result == DialogResult.No)
                         return;
-                    string key = listView1.SelectedItems[0].Name;
+                    string key = listView1.SelectedItems[i].Name;
                     //MessageBox.Show(key);
                     FileAttributes attr = File.GetAttributes(key);
                     if ((attr & FileAttributes.Directory) != FileAttributes.Directory)
@@ -61,15 +65,12 @@ namespace FileExplorer
                     else
 
                     {
-                        //
+                 
                         if (!Directory.EnumerateFileSystemEntries(key).Any())
                         {
                             if (Directory.GetDirectories(key).Length != 0)
                             {
-                                //MessageBox.Show("Has empty folder inside");
-                                string name = "Folder: " + listView1.Items[key].Text + " contains data, continues?";
-                               // DialogResult dr = MessageBox.Show(name, "Check", MessageBoxButtons.YesNo);
-                               // if (dr == DialogResult.Yes)
+                                
                                 {
                                     DeleteDirectory(key);
                                    
@@ -83,13 +84,20 @@ namespace FileExplorer
                         }
                         else
                         {
+                            if (GetDirectorySize(key)!=0)
 
-                            string name = "Folder: " + listView1.Items[key].Text + " contains data, continues?";
-                            DialogResult dr = MessageBox.Show(name, "Check", MessageBoxButtons.YesNo);
-                            if (dr == DialogResult.Yes)
+                            {
+                                string name = "Folder: " + listView1.Items[key].Text + " contains data, continues?";
+                                DialogResult dr = MessageBox.Show(name, "Check", MessageBoxButtons.YesNo);
+                                if (dr == DialogResult.Yes)
+                                {
+                                    DeleteDirectory(key);
+
+                                }
+                            }
+                            else
                             {
                                 DeleteDirectory(key);
-                                
                             }
 
                         }
@@ -103,51 +111,57 @@ namespace FileExplorer
                 int c = listView2.SelectedItems.Count;
                 for (int i = 0; i < c; i++)
                 {
+
+                    if (listView2.SelectedItems[i].Text == "..")
+                    {
+                        continue;
+                    }
                     DialogResult result = MessageBox.Show("     Do you want to delete this?", "Check", MessageBoxButtons.YesNo);
                     if (result == DialogResult.No)
                         return;
-                    string key = listView2.SelectedItems[0].Name;
+                    string key = listView2.SelectedItems[i].Name;
                    
                     FileAttributes attr = File.GetAttributes(key);
                     if ((attr & FileAttributes.Directory) != FileAttributes.Directory)
                     {
                         File.Delete(key);
-                        listView2.Items[key].Remove();
-                        listView2.Update();
+                        
                         continue;
                     }
                     else
                     {
-                        if (!Directory.EnumerateFiles(key).Any())
+                        if (!Directory.EnumerateFileSystemEntries(key).Any())
                         {
                             if (Directory.GetDirectories(key).Length != 0)
+                            {
+
+                                {
+                                    DeleteDirectory(key);
+
+                                }
+                            }
+                            else
+                            {
+                                DeleteDirectory(key);
+
+                            }
+                        }
+                        else
+                        {
+                            if (GetDirectorySize(key) != 0)
+
                             {
                                 string name = "Folder: " + listView2.Items[key].Text + " contains data, continues?";
                                 DialogResult dr = MessageBox.Show(name, "Check", MessageBoxButtons.YesNo);
                                 if (dr == DialogResult.Yes)
                                 {
                                     DeleteDirectory(key);
-                                    listView2.Items[key].Remove();
-                                    listView2.Update();
+
                                 }
                             }
                             else
                             {
                                 DeleteDirectory(key);
-                                listView2.Items[key].Remove();
-                                listView2.Update();
-                            }
-                        }
-                        else
-                        {
-
-                            string name = "Folder: " + listView2.Items[key].Text + " contains data, continues?";
-                            DialogResult dr = MessageBox.Show(name, "Check", MessageBoxButtons.YesNo);
-                            if (dr == DialogResult.Yes)
-                            {
-                                DeleteDirectory(key);
-                                listView2.Items[key].Remove();
-                                listView2.Update();
                             }
 
                         }
@@ -366,7 +380,7 @@ namespace FileExplorer
             
         }
        public double size = 0;
-        private double GetDirectorySize(string directory)
+        public double GetDirectorySize(string directory)
         {
            
             foreach (string dir in Directory.GetDirectories(directory))

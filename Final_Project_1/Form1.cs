@@ -81,8 +81,8 @@ namespace FileExplorer
             button4.Text = "MOVE (F6)";
             button5.Text = "NEW FOLDER (F7)";
             button6.Text = "DELETE (F8)";
-            listView2.ContextMenuStrip = contextMenuStrip1;
-            listView1.ContextMenuStrip = contextMenuStrip1;
+            listView2.ContextMenuStrip = contextMenuStrip3;
+            listView1.ContextMenuStrip = contextMenuStrip3;
             listView1.MultiSelect = true;
             listView2.MultiSelect = true;
             program = @"notepad.exe";
@@ -272,6 +272,9 @@ namespace FileExplorer
                     LoadLSfromTextBox(listView1, textBox1, out selectedFolder1, comboBox1, listView2);
                     run = 1;
                     Button11_Click(sender, e);
+                    comboBox1.Text = Path.GetPathRoot(textBox1.Text);
+                    DriveInfo drive = new DriveInfo(comboBox1.Text);
+                    label1.Text = (drive.AvailableFreeSpace / (1024 * 1024 * 1024)).ToString() + "/" + (drive.TotalSize / (1024 * 1024 * 1024)).ToString() + "GB";
                 }
                 else
                 {
@@ -287,9 +290,14 @@ namespace FileExplorer
             {
                 if (Directory.Exists(textBox2.Text))
                 {
+                    
                     LoadLSfromTextBox(listView2, textBox2, out selectedFolder2, comboBox2, listView1);
                     run = 2;
                     Button11_Click(sender, e);
+                    comboBox2.Text = Path.GetPathRoot(textBox2.Text);
+                    DriveInfo drive = new DriveInfo(comboBox2.Text);
+                    
+                    label2.Text = (drive.AvailableFreeSpace / (1024 * 1024 * 1024)).ToString() + "/" + (drive.TotalSize / (1024 * 1024 * 1024)).ToString() + "GB";
                 }
                 else
                 {
@@ -624,36 +632,35 @@ namespace FileExplorer
 
         private void ListView1_MouseClick(object sender, MouseEventArgs e)
         {
+            run = 1;
             string path;
-           
+            listView1.ContextMenuStrip = contextMenuStrip3;
+
             if (e.Button == MouseButtons.Right)
             {
-                //MessageBox.Show(listView1.SelectedItems.Count.ToString());
-                
-                if (listView1.SelectedItems.Count>0)
+
+                if (listView1.SelectedItems.Count > 0)
                 {
                     path = listView1.FocusedItem.Name;
-                    
-                    FileAttributes attr = File.GetAttributes(path);
-                    if ((attr & FileAttributes.Directory) == FileAttributes.Directory)
+                    if (listView1.SelectedItems.Count == 1)
                     {
-                        //run = 1;
-                        listView1.ContextMenuStrip = contextMenuStrip1;
-                        contextMenuStrip1.Show(Cursor.Position);
-                        
+                        FileAttributes attr = File.GetAttributes(path);
+                        if ((attr & FileAttributes.Directory) == FileAttributes.Directory)
+                        {
+
+                            listView1.ContextMenuStrip = contextMenuStrip1;
+                        }
+                        else
+                        {
+                            listView1.ContextMenuStrip = contextMenuStrip2;
+                        }
                     }
                     else
                     {
-                       
-                        listView1.ContextMenuStrip = contextMenuStrip2;
-                        contextMenuStrip2.Show(Cursor.Position);
-                        
-                        
-                        
+                        listView1.ContextMenuStrip = mix;
                     }
-
                 }
-                
+                listView1.ContextMenuStrip.Show(Cursor.Position);
             }
         }
 
@@ -663,37 +670,33 @@ namespace FileExplorer
         {
             run = 2;
             string path;
-            if (listView2.SelectedItems.Count > 0)
-            {
-                
-            }
+            listView2.ContextMenuStrip = contextMenuStrip3;
+            
             if (e.Button == MouseButtons.Right)
             {
-                //MessageBox.Show(listView1.SelectedItems.Count.ToString());
-
+   
                 if (listView2.SelectedItems.Count > 0)
                 {
                     path = listView2.FocusedItem.Name;
-
-                    FileAttributes attr = File.GetAttributes(path);
-                    if ((attr & FileAttributes.Directory) == FileAttributes.Directory)
+                    if (listView2.SelectedItems.Count == 1)
                     {
-                        //run = 1;
-                        listView2.ContextMenuStrip = contextMenuStrip1;
-                        contextMenuStrip1.Show(Cursor.Position);
+                        FileAttributes attr = File.GetAttributes(path);
+                        if ((attr & FileAttributes.Directory) == FileAttributes.Directory)
+                        {
 
+                            listView2.ContextMenuStrip = contextMenuStrip1;
+                        }
+                        else
+                        {
+                            listView2.ContextMenuStrip = contextMenuStrip2;
+                        }
                     }
                     else
                     {
-
-                        listView2.ContextMenuStrip = contextMenuStrip2;
-                        contextMenuStrip2.Show(Cursor.Position);
-
-
-
+                        listView2.ContextMenuStrip = mix;
                     }
-
                 }
+                listView2.ContextMenuStrip.Show(Cursor.Position);
             }
         }
 
@@ -1002,7 +1005,7 @@ namespace FileExplorer
                             deleted[i] = listView1.SelectedItems[i].Name;
                             form_temp.ShowDialog();
                             new_name = form_temp.new_Path;
-                            if(new_name==null)
+                            if(new_name==null || new_name == listView1.SelectedItems[i].Text)
                             {
                                 return;
                             }
@@ -1030,7 +1033,7 @@ namespace FileExplorer
                             path = path.Remove(index);
                             form_temp.ShowDialog();
                             new_name = form_temp.new_Path;
-                            if (new_name == null)
+                            if (new_name == null || new_name == listView1.SelectedItems[i].Text)
                             {
                                 return;
                             }
@@ -1077,7 +1080,7 @@ namespace FileExplorer
                             deleted[i] = listView2.SelectedItems[i].Name;
                             form_temp.ShowDialog();
                             new_name = form_temp.new_Path;
-                            if (new_name == null)
+                            if (new_name == null || listView2.SelectedItems[i].Text== new_name)
                             {
                                 return;
                             }
@@ -1128,7 +1131,7 @@ namespace FileExplorer
 
         private void ContextMenuStrip1_Opening(object sender, CancelEventArgs e)
         {
-
+            //listView2.ContextMenuStrip = listView1.ContextMenuStrip = contextMenuStrip3;
         }
 
         
@@ -2117,7 +2120,7 @@ namespace FileExplorer
                         }
                         else
                         {
-                            if (listView1.SelectedItems[i].Text == "..")
+                            if (listView2.SelectedItems[i].Text == "..")
                             {
                                 continue;
                             }
@@ -2195,7 +2198,7 @@ namespace FileExplorer
                 {
                     for (int i = 0; i < c; i++)
                     {
-                        if (listView1.SelectedItems[i].Text == "..")
+                        if (listView2.SelectedItems[i].Text == "..")
                         {
                             continue;
                         }
@@ -2262,7 +2265,7 @@ namespace FileExplorer
 
                     for (int i = 0; i < c; i++)
                     {
-                        if (listView1.SelectedItems[i].Text == "..")
+                        if (listView2.SelectedItems[i].Text == "..")
                         {
                             continue;
                         }
@@ -2403,6 +2406,36 @@ namespace FileExplorer
         private void OptionToolStripMenuItem_Click(object sender, EventArgs e)
         {
 
+        }
+
+        private void EditToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void EditToolStripMenuItem1_Click_1(object sender, EventArgs e)
+        {
+            EditToolStripMenuItem_Click(sender, e);
+        }
+
+        private void ToolStripMenuItem2_Click(object sender, EventArgs e)
+        {
+            Button5_Click(sender, e);
+        }
+
+        private void ListView2_Click(object sender, EventArgs e)
+        {
+           
+        }
+
+        private void ContextMenuStrip3_Opening(object sender, CancelEventArgs e)
+        {
+
+        }
+
+        private void CopyToolStripMenuItem3_Click(object sender, EventArgs e)
+        {
+            Button3_Click(sender, e);
         }
 
         private void CheckToolStripMenuItem1_Click(object sender, EventArgs e)
